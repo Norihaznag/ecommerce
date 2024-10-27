@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Your E-commerce Store</h3>
+            <h3 className="text-xl font-semibold mb-4">E-commerce Store</h3>
             <p className="mb-4">Providing quality products since [Year]</p>
             <p>123 E-commerce St, City, State 12345</p>
             <p>Phone: (123) 456-7890</p>
@@ -62,7 +62,7 @@ const Footer = () => {
         <div className="mt-8 pt-8 border-t border-gray-700">
           <div className="flex justify-between items-center flex-col md:flex-row">
             <div className="mb-4 md:mb-0">
-              <p>&copy; {new Date().getFullYear()} Your E-commerce Store. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Created And Designed by Noureddine Azinag. All rights reserved.</p>
             </div>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition duration-300">

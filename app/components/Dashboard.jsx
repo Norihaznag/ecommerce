@@ -212,14 +212,8 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Revenue"
-          value="$15,231.89"
-          icon={DollarSign}
-          description="from last month"
-          trend="+20.1%"
-        />
+      <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3">
+      
         <StatCard
           title="Orders"
           value="156"
