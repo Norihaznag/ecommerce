@@ -4,8 +4,6 @@ import Image from 'next/image';
 import { Search, Edit, Trash2, X, Plus, XCircle } from 'lucide-react';
 import ProductPropertySelector from './ProductPropertySelector'
 
- 
-
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
@@ -35,6 +33,7 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
     tags: [],
     customProps: []
   }), []);
+
 
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState('');

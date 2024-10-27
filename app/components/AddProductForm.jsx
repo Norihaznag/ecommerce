@@ -10,6 +10,8 @@ const AddProductForm = () => {
     category: '',
     image: null
   });
+
+  console.log(product);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
