@@ -1,9 +1,15 @@
-import React from 'react'
-import Dashboard from '../components/Dashboard'
-const page = () => {
+import dynamic from 'next/dynamic'
+ 
+const DynamicComponentWithNoSSR = dynamic(
+  () => import('../components/Dashboard'),
+  { ssr: false }
+)
+ 
+export default function Page() {
   return (
-    <Dashboard/>
+    <div>
+      <h1>My page</h1>
+      <DynamicComponentWithNoSSR />
+    </div>
   )
 }
-
-export default page

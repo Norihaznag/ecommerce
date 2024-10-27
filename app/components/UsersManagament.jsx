@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Search, UserPlus, Edit, Trash2 } from 'lucide-react';
 
 const UsersManagement = () => {
@@ -42,6 +42,13 @@ const UsersManagement = () => {
     const statusMatch = !statusFilter || user.status === statusFilter;
     return searchMatch && roleMatch && statusMatch;
   });
+
+  const UserEdite = ({isVisible , Editable , }) => {
+
+    return(
+      <div className=""></div>
+    )
+  }
 
   return (
     <div className="min-h-screen ">

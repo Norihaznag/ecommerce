@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Cart from "./Cart";
-import { Home, Package, Users, PlusCircle, List, LogOut } from "lucide-react";
+import { Home, Package, Users } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

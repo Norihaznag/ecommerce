@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { 
-  User, Edit, Trash2, Search, Filter, PlusCircle  , XCircle
+   Edit, Trash2, Search, Filter, PlusCircle  , XCircle
 } from 'lucide-react';
 
 const UsersManagement = () => {
@@ -20,7 +20,7 @@ const UsersManagement = () => {
       role: 'User',
       createdAt: '2023-05-15T10:30:00Z',
     }
-    // Add more sample users as needed
+    
   ]);
 
   const [selectedUser, setSelectedUser] = useState(null);

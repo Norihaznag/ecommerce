@@ -1,10 +1,11 @@
-import OrderManagement from "../../components/OrderManagement"
 import React from 'react'
 
-const page = () => {
+const Orders = () => {
   return (
-        <OrderManagement/>
+       <div className="">
+        
+       </div>
   )
 }
 
-export default page
+export default Orders

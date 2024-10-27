@@ -41,28 +41,24 @@ const ProductPropertySelector = ({
     }
   }), []);
 
-  // State management
+  // Unified state for all properties
   const [selectedProperty, setSelectedProperty] = useState("");
-  const [customProps, setCustomProps] = useState([]);
   const [propertyValue, setPropertyValue] = useState("");
   const [newPropName, setNewPropName] = useState('');
   const [newPropValue, setNewPropValue] = useState('');
-  const [selectedProperties, setSelectedProperties] = useState(initialProperties);
+  const [properties, setProperties] = useState(initialProperties);
   const [error, setError] = useState("");
+  const [customError, setCustomError] = useState("");
   const [isEditing, setIsEditing] = useState(null);
-
-console.log([
-  {customProps : customProps , selectedProperties : selectedProperties }
-])
 
   // Memoized grouped properties
   const groupedProperties = useMemo(() => 
-    selectedProperties.reduce((acc, prop) => {
+    properties.reduce((acc, prop) => {
       if (!acc[prop.type]) acc[prop.type] = [];
       acc[prop.type].push(prop.value);
       return acc;
     }, {}),
-    [selectedProperties]
+    [properties]
   );
 
   // Validation helper
@@ -83,7 +79,26 @@ console.log([
     return null;
   }, [propertyTypes, customValidation]);
 
-  // Handle property addition
+  // Check for duplicates in properties
+  const checkDuplicates = useCallback((type, value, isCustom = false) => {
+    return properties.some(prop => {
+      if (isCustom) {
+        // For custom properties, check both name/type and value duplicates
+        return (
+          prop.type.toLowerCase() === type.toLowerCase() ||
+          prop.value.toLowerCase() === value.toLowerCase()
+        );
+      } else {
+        // For standard properties, only check duplicates within same type
+        return (
+          prop.type === type &&
+          prop.value.toLowerCase() === value.toLowerCase()
+        );
+      }
+    });
+  }, [properties]);
+
+  // Handle standard property addition
   const handleAddProperty = useCallback(() => {
     setError("");
 
@@ -98,17 +113,12 @@ console.log([
       return;
     }
 
-    const exists = selectedProperties.some(
-      prop => prop.type === selectedProperty && 
-      prop.value.toLowerCase() === propertyValue.trim().toLowerCase()
-    );
-
-    if (exists) {
+    if (checkDuplicates(selectedProperty, propertyValue)) {
       setError("This property value already exists!");
       return;
     }
 
-    const currentTypeCount = selectedProperties.filter(
+    const currentTypeCount = properties.filter(
       prop => prop.type === selectedProperty
     ).length;
 
@@ -118,42 +128,75 @@ console.log([
     }
 
     const newProperties = [
-      ...selectedProperties,
+      ...properties,
       {
         type: selectedProperty,
-        value: propertyValue.trim()
+        value: propertyValue.trim(),
+        isCustom: false
       }
     ];
 
-    
-
-    setSelectedProperties(newProperties);
+    setProperties(newProperties);
     onPropertiesChange?.(newProperties);
-
     setPropertyValue("");
     setSelectedProperty("");
-  }, [selectedProperty, propertyValue, selectedProperties, maxPropertiesPerType, validateProperty, onPropertiesChange]);
-
-  // Handle property removal
-  const removeProperty = useCallback((indexToRemove) => {
-    const newProperties = selectedProperties.filter((_, index) => index !== indexToRemove);
-    setSelectedProperties(newProperties);
-    onPropertiesChange?.(newProperties);
-  }, [selectedProperties, onPropertiesChange]);
+  }, [selectedProperty, propertyValue, properties, maxPropertiesPerType, validateProperty, onPropertiesChange, checkDuplicates]);
 
   // Handle custom property addition
   const addCustomProp = useCallback((e) => {
     e.preventDefault();
-    if (newPropName.trim() && newPropValue.trim()) {
-      const newCustomProps = [...customProps, {
-        name: newPropName.trim(),
-        value: newPropValue.trim()
-      }];
-      setCustomProps(newCustomProps);
-      setNewPropName('');
-      setNewPropValue('');
+    setCustomError("");
+
+    const propName = newPropName.trim();
+    const propValue = newPropValue.trim();
+
+    if (!propName || !propValue) {
+      setCustomError("Both name and value are required");
+      return;
     }
-  }, [newPropName, newPropValue, customProps]);
+
+    // Check if the property name already exists as a standard property type
+    if (propertyTypes[propName]) {
+      setCustomError(`"${propName}" is a reserved property name. Please use the standard property selector above.`);
+      return;
+    }
+
+    // Check for duplicates in both custom and standard properties
+    if (checkDuplicates(propName, propValue, true)) {
+      setCustomError("A property with this name or value already exists!");
+      return;
+    }
+
+    const newProperties = [
+      ...properties,
+      {
+        type: propName,
+        value: propValue,
+        isCustom: true
+      }
+    ];
+
+    setProperties(newProperties);
+    onPropertiesChange?.(newProperties);
+    setNewPropName('');
+    setNewPropValue('');
+    setCustomError("");
+  }, [newPropName, newPropValue, properties, onPropertiesChange, propertyTypes, checkDuplicates]);
+
+  // Handle property removal
+  const removeProperty = useCallback((indexToRemove) => {
+    const newProperties = properties.filter((_, index) => index !== indexToRemove);
+    setProperties(newProperties);
+    onPropertiesChange?.(newProperties);
+  }, [properties, onPropertiesChange]);
+
+  // Handle property edit
+  const handleEdit = useCallback((index, newValue) => {
+    const newProperties = [...properties];
+    newProperties[index].value = newValue;
+    setProperties(newProperties);
+    onPropertiesChange?.(newProperties);
+  }, [properties, onPropertiesChange]);
 
   // KeyPress handler
   const handleKeyPress = useCallback((e) => {
@@ -163,17 +206,16 @@ console.log([
   }, [handleAddProperty]);
 
   return (
-    <div className="max-w-2xl mx-auto  bg-white  space-y-6">
+    <div className="max-w-2xl mx-auto bg-white space-y-6">
       {error && (
-      <div className="d">
-                  {error}
-      </div>
-       
+        <div className="text-red-500 bg-red-50 p-3 rounded-md">
+          {error}
+        </div>
       )}
 
-      {/* Property Selection Controls */}
-      <div className="flex flex-col  gap-2">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Properties</h3>
+      {/* Standard Property Selection Controls */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Standard Properties</h3>
         <div className="flex-1">
           <select
             value={selectedProperty}
@@ -214,116 +256,67 @@ console.log([
         </div>
       </div>
 
-      <div className="w-full ">
-  <h3 className="text-lg font-semibold text-gray-900 mb-4">Custom</h3>
-  
-  {/* Properties List */}
-  <div className="space-y-3 mb-6">
-    {customProps.map((prop, index) => (
-      <div key={index} className="w-full">
-        {isEditing === index ? (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="text"
-              value={prop.name}
-              onChange={(e) => {
-                const newProps = [...customProps];
-                newProps[index].name = e.target.value;
-                setCustomProps(newProps);
-              }}
-              className="flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Property name"
-            />
-            <input
-              type="text"
-              value={prop.value}
-              onChange={(e) => {
-                const newProps = [...customProps];
-                newProps[index].value = e.target.value;
-                setCustomProps(newProps);
-              }}
-              className="flex-1 min-w-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Property value"
-            />
-            <button
-              onClick={() => setIsEditing(null)}
-              className="inline-flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200"
-            >
-              Save
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <div
-              className="flex-1 px-4 py-3 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-              onClick={() => setIsEditing(index)}
-            >
-              <span className="font-medium text-gray-700">{prop.name}:</span>{" "}
-              <span className="text-gray-600">{prop.value}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const newProps = [...customProps];
-                newProps.splice(index, 1);
-                setCustomProps(newProps);
-              }}
-              className="p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
-              aria-label="Delete property"
-            >
-              <Trash2 size={20} />
-            </button>
+      {/* Custom Properties Section */}
+      <div className="w-full">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Custom Properties</h3>
+        {customError && (
+          <div className="text-red-500 bg-red-50 p-3 rounded-md mb-4">
+            {customError}
           </div>
         )}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={newPropName}
+            onChange={(e) => {
+              setNewPropName(e.target.value);
+              setCustomError("");
+            }}
+            className="flex-1 min-w-[120px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+            placeholder="Property name"
+          />
+          <input
+            type="text"
+            value={newPropValue}
+            onChange={(e) => {
+              setNewPropValue(e.target.value);
+              setCustomError("");
+            }}
+            className="flex-1 min-w-[120px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+            placeholder="Property value"
+          />
+          <button
+            type="button"
+            onClick={addCustomProp}
+            disabled={!newPropName.trim() || !newPropValue.trim()}
+            className="inline-flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-w-[44px]"
+          >
+            <Plus size={20} />
+          </button>
+        </div>
       </div>
-    ))}
-  </div>
 
-  {/* Add New Property Form */}
-  <div className="flex flex-col sm:flex-row gap-2">
-    <input
-      type="text"
-      value={newPropName}
-      onChange={(e) => setNewPropName(e.target.value)}
-      className="flex-1 min-w-[120px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-      placeholder="Property name"
-    />
-    <input
-      type="text"
-      value={newPropValue}
-      onChange={(e) => setNewPropValue(e.target.value)}
-      className="flex-1 min-w-[120px] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-      placeholder="Property value"
-    />
-    <button
-      type="button"
-      onClick={addCustomProp}
-      disabled={!newPropName.trim() || !newPropValue.trim()}
-      className="inline-flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 min-w-[44px]"
-    >
-      <Plus size={20} />
-    </button>
-  </div>
-</div>
-
-      {/* Selected Properties Display */}
+      {/* All Properties Display */}
       {Object.keys(groupedProperties).length > 0 && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Selected Properties</h3>
+          <h3 className="font-semibold text-lg">All Properties</h3>
           
           {Object.entries(groupedProperties).map(([type, values]) => (
             <div key={type} className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium text-gray-700 mb-2">{type}</h4>
               <div className="flex flex-wrap gap-2">
                 {values.map((value, valueIndex) => {
-                  const propertyIndex = selectedProperties.findIndex(
+                  const propertyIndex = properties.findIndex(
                     p => p.type === type && p.value === value
                   );
+                  const isCustomProp = properties[propertyIndex]?.isCustom;
                   
                   return (
                     <div
                       key={`${type}-${value}-${valueIndex}`}
-                      className="group flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-md shadow-sm hover:border-blue-500 transition-colors"
+                      className={`group flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-md shadow-sm hover:border-blue-500 transition-colors ${
+                        isCustomProp ? 'border-blue-200' : ''
+                      }`}
                     >
                       <span>{value}</span>
                       <button

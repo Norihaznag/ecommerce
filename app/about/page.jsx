@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 export const metadata = {
-  title: 'About Us | Your E-commerce Store',
+  title: 'About Us | Derba Store',
   description: 'Learn about our company history, mission, and commitment to providing quality products and excellent customer service.',
   openGraph: {
     title: 'About Us | Your E-commerce Store',
@@ -39,7 +39,7 @@ export default function AboutPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
         <p className="mb-4">
-          At Your E-commerce Store, we're committed to [your mission statement, e.g., "making quality products accessible to everyone" or "revolutionizing the way people shop for everyday items"]. We believe in [core values, e.g., sustainability, innovation, customer satisfaction].
+          At Your E-commerce Store, were committed to [your mission statement, e.g.,making quality products accessible to everyone or revolutionizing the way people shop for everyday items]. We believe in [core values, e.g., sustainability, innovation, customer satisfaction].
         </p>
       </section>
       
@@ -49,7 +49,7 @@ export default function AboutPage() {
           <li>Curated selection of top-quality products</li>
           <li>Exceptional customer service</li>
           <li>Fast and reliable shipping</li>
-          <li>[Any unique selling points, e.g., "Eco-friendly packaging" or "30-day money-back guarantee"]</li>
+          <li>[Any unique selling points, e.g., Eco-friendly packaging or 30-day money-back guarantee]</li>
         </ul>
       </section>
       

@@ -46,7 +46,7 @@ const SmartRecommendations = ({ currentProduct, userHistory, trendingProducts })
     };
 
     getRecommendations();
-  }, [currentProduct, userHistory, trendingProducts, getComplementaryProducts]);
+  }, [currentProduct, userHistory, trendingProducts]);
 
   
 

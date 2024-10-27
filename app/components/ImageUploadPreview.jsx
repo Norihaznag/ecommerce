@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Edit2, Image as ImageIcon } from 'lucide-react';
+import { X, Edit2, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
 const ImageUploadPreview = () => {

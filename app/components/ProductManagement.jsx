@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Search, Edit, Trash2, X, Plus, XCircle } from 'lucide-react';
 import ProductPropertySelector from './ProductPropertySelector'
 
  
+
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
@@ -24,7 +25,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 };
 
 const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
+  const initialFormData = useMemo(() => ({
     title: '',
     description: '',
     price: '',
@@ -33,28 +34,41 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
     thumbnails: [],
     tags: [],
     customProps: []
-  });
+  }), []);
+
+  const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState('');
   const [mainImagePreview, setMainImagePreview] = useState('');
   const [thumbnailPreviews, setThumbnailPreviews] = useState([]);
   const [newTag, setNewTag] = useState('');
 
+  
 
   useEffect(() => {
-    if (product) {
-      setFormData({
-        title: product.title || '',
-        description: product.description || '',
-        price: product.price || '',
-        category: product.category || '',
-        mainImage: product.mainImage || null,
-        thumbnails: product.thumbnails || [],
-        tags: product.tags || [],
-      });
-      setMainImagePreview(product.mainImage || '');
-      setThumbnailPreviews(product.thumbnails || []);
+    if (isOpen) {
+      if (product) {
+        setFormData({
+          title: product.title || '',
+          description: product.description || '',
+          price: product.price || '',
+          category: product.category || '',
+          mainImage: product.mainImage || null,
+          thumbnails: product.thumbnails || [],
+          tags: product.tags || [],
+          customProps: product.customProps || []
+        });
+        setMainImagePreview(product.mainImage || '');
+        setThumbnailPreviews(product.thumbnails || []);
+      } else {
+        // Reset form when adding new product
+        setFormData(initialFormData);
+        setMainImagePreview('');
+        setThumbnailPreviews([]);
+        setNewTag('');
+        setError('');
+      }
     }
-  }, [product]);
+  }, [initialFormData, isOpen, product]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,6 +76,15 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleClose = () => {
+    setFormData(initialFormData);
+    setMainImagePreview('');
+    setThumbnailPreviews([]);
+    setNewTag('');
+    setError('');
+    onClose();
   };
 
   const handleMainImageChange = (event) => {
@@ -154,8 +177,13 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
     }
   };
 
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedProduct(null); // Clear selected product when modal closes
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="space-y-4">
         <h2 className="text-xl font-bold">
           {product ? 'Edit Product' : 'Add New Product'}
@@ -462,6 +490,11 @@ const ProductManagement = () => {
       </div>
     );
   }
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setSelectedProduct(null); // Clear selected product when modal closes
+  };
+
 
   return (
     <div className="space-y-4 sm:p-4">
@@ -496,7 +529,7 @@ const ProductManagement = () => {
         </button>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="bg-white border border-gray-300  rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -558,10 +591,7 @@ const ProductManagement = () => {
       <EditProductModal
         product={selectedProduct}
         isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedProduct(null);
-        }}
+        onClose={handleModalClose}
         onSave={handleSave}
       />
     </div>
