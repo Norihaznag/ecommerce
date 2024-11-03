@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Cart from "./Cart";
-import { Home, Package, Users } from "lucide-react";
+import { Home, NotepadTextIcon, Package, Users } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,6 +21,7 @@ const Header = () => {
           <span>Dashboard</span>
         </Link>
       </li>
+
       <li>
         <Link
           href="/admin/products"
@@ -28,6 +29,16 @@ const Header = () => {
         >
           <Package size={20} />
           <span>Products</span>
+        </Link>
+      </li>
+
+      <li>
+        <Link
+          href="/admin/orders"
+          className="flex items-center space-x-2  rounded hover:text-white max-sm:py-2 "
+        >
+          <NotepadTextIcon size={20} />
+          <span>Orders</span>
         </Link>
       </li>
     

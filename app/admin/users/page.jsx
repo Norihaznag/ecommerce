@@ -1,39 +1,59 @@
 "use client";
-import  { useState } from 'react';
-import { Search, UserPlus, Edit, Trash2 } from 'lucide-react';
-
+import { useState } from "react";
+import { Search, UserPlus, Edit, Trash2 } from "lucide-react";
+import EditUserModal from "@/app/components/EditUserModal";
 const UsersManagement = () => {
   const [users, setUsers] = useState([
     {
-      id: '1',
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      role: 'admin',
-      status: 'active',
-      createdAt: '2024-03-15T10:30:00Z',
-      lastLogin: '2024-04-20T15:45:00Z'
+      id: "1",
+      name: "John Doe",
+      username: "johndoe",
+      email: "john@example.com",
+      role: "admin",
+      status: "active",
+      createdAt: "2024-03-15T10:30:00Z",
+      lastLogin: "2024-04-20T15:45:00Z",
     },
     {
-      id: '2',
-      name: 'Jane Smith',
-      username: 'janesmith',
-      email: 'jane@example.com',
-      role: 'moderator',
-      status: 'inactive',
-      createdAt: '2024-02-10T08:20:00Z',
-      lastLogin: '2024-04-19T11:30:00Z'
-    }
+      id: "2",
+      name: "Jane Smith",
+      username: "janesmith",
+      email: "jane@example.com",
+      role: "moderator",
+      status: "inactive",
+      createdAt: "2024-02-10T08:20:00Z",
+      lastLogin: "2024-04-19T11:30:00Z",
+    },
   ]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const filteredUsers = users.filter(user => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleAddUser = (newUser) => {
+    const userWithId = {
+      ...newUser,
+      id: (users.length + 1).toString(),
+      createdAt: new Date().toISOString(),
+      lastLogin: null,
+    };
+    setUsers([...users, userWithId]);
+  };
+
+  const handleEditUser = (updatedUser) => {
+    setUsers(
+      users.map((user) =>
+        user.id === updatedUser.id ? { ...user, ...updatedUser } : user
+      )
+    );
+  };
+
+  const filteredUsers = users.filter((user) => {
     const searchMatch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,12 +63,9 @@ const UsersManagement = () => {
     return searchMatch && roleMatch && statusMatch;
   });
 
-  const UserEdite = ({isVisible , Editable , }) => {
-
-    return(
-      <div className=""></div>
-    )
-  }
+  const UserEdite = ({ isVisible, Editable }) => {
+    return <div className=""></div>;
+  };
 
   return (
     <div className="min-h-screen ">
@@ -106,30 +123,39 @@ const UsersManagement = () => {
                 <tr key={user.id} className="border-b hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex flex-col">
-                      <span className="font-medium text-gray-900">{user.name}</span>
-                      <span className="text-sm text-gray-500">{user.email}</span>
+                      <span className="font-medium text-gray-900">
+                        {user.name}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {user.email}
+                      </span>
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-sm
-                      ${user.role === 'admin' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : user.role === 'moderator'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-100 text-gray-800'
+                    <span
+                      className={`inline-flex px-3 py-1 rounded-full text-sm
+                      ${
+                        user.role === "admin"
+                          ? "bg-purple-100 text-purple-800"
+                          : user.role === "moderator"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-sm
-                      ${user.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                    <span
+                      className={`inline-flex px-3 py-1 rounded-full text-sm
+                      ${
+                        user.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                      {user.status.charAt(0).toUpperCase() +
+                        user.status.slice(1)}
                     </span>
                   </td>
                   <td className="p-4 text-gray-500">
@@ -137,13 +163,13 @@ const UsersManagement = () => {
                   </td>
                   <td className="p-4">
                     <div className="flex justify-end gap-2">
-                      <button 
+                      <button
                         onClick={() => setSelectedUser(user)}
                         className="text-purple-600 hover:text-purple-800"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           setSelectedUser(user);
                           setIsDeleteDialogOpen(true);
@@ -166,7 +192,8 @@ const UsersManagement = () => {
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h3 className="text-lg font-semibold mb-4">Delete User</h3>
               <p className="text-gray-600 mb-6">
-                Are you sure you want to delete this user? This action cannot be undone.
+                Are you sure you want to delete this user? This action cannot be
+                undone.
               </p>
               <div className="flex justify-end gap-4">
                 <button
@@ -178,7 +205,9 @@ const UsersManagement = () => {
                 <button
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                   onClick={() => {
-                    setUsers(users.filter(user => user.id !== selectedUser?.id));
+                    setUsers(
+                      users.filter((user) => user.id !== selectedUser?.id)
+                    );
                     setIsDeleteDialogOpen(false);
                     setSelectedUser(null);
                   }}
@@ -195,7 +224,7 @@ const UsersManagement = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h3 className="text-lg font-semibold mb-4">
-                {selectedUser ? 'Edit User' : 'Add New User'}
+                {selectedUser ? "Edit User" : "Add New User"}
               </h3>
               <form className="space-y-4">
                 <input
@@ -225,7 +254,7 @@ const UsersManagement = () => {
                     type="submit"
                     className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
                   >
-                    {selectedUser ? 'Save Changes' : 'Add User'}
+                    {selectedUser ? "Save Changes" : "Add User"}
                   </button>
                 </div>
               </form>
@@ -233,6 +262,16 @@ const UsersManagement = () => {
           </div>
         )}
       </div>
+
+      <EditUserModal
+        isOpen={isEditModalOpen || !!selectedUser}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedUser(null);
+        }}
+        onSave={selectedUser ? handleEditUser : handleAddUser}
+        user={selectedUser}
+      />
     </div>
   );
 };

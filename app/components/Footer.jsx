@@ -9,7 +9,7 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <h3 className="text-xl font-semibold mb-4">E-commerce Store</h3>
-            <p className="mb-4">Providing quality products since [Year]</p>
+            <p className="mb-4">Providing quality products since 2022</p>
             <p>123 E-commerce St, City, State 12345</p>
             <p>Phone: (123) 456-7890</p>
             <p>Email: info@yourecommercestore.com</p>

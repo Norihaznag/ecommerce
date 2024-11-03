@@ -1,10 +1,11 @@
-"use client";
-
+"use client" ;
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ArrowUpDown } from 'lucide-react';
 import ProductCard from './ProductCard';
+import Pagination from './Pagination';
+import { useSearchParams , useRouter } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -13,8 +14,9 @@ export default function Products({ initialProducts }) {
   const [filteredProducts, setFilteredProducts] = useState(initialProducts);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('price');
+  const srchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState('asc');
-  const [currentPage, setCurrentPage] = useState(1);
+  const currentPage = srchParams.get('page' ) || 1;
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -115,26 +117,13 @@ export default function Products({ initialProducts }) {
           ))}
         </div>
 
-        {/* Pagination */}
-        <div className="mt-8 flex justify-center items-center space-x-4">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <span className="text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
+        {/* Pagination Component */}
+        <Pagination
+          pagination={{
+            page: currentPage,
+            pageCount: totalPages,
+          }}
+        />
       </div>
     </div>
   );
